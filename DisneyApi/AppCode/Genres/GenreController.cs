@@ -28,15 +28,13 @@ namespace DisneyApi.AppCode.Genres
             {
                 return BadRequest();
             }
-            try
+
+            var nameAlreadyTaken = _cmdService.IsExistentName(model);
+            if(nameAlreadyTaken)
             {
-                var newGenreId = await _cmdService.CreateGenre(model);
-                return Ok(newGenreId);
-            }
-            catch (ItemAlreadyExistsException ex)
-            {
-                return BadRequest(new { message = ex.Message, errorCode = ex.StatusCode});
-            }
+                return BadRequest("Name already exists");
+            }        
+            return Ok(await _cmdService.CreateGenre(model));
         }
 
         [HttpGet]
@@ -48,28 +46,22 @@ namespace DisneyApi.AppCode.Genres
         [HttpGet("{id}")]
         public IActionResult Details(int id)
         {
-            try
-            {
-                return Ok(_queryService.GetGenreById(id));
-            }
-            catch(ItemNotFoundException ex)
-            {
-                return NotFound(new {message = ex.Message});
-            }
+            var result = _queryService.GetGenreById(id);
+            if(result == null)
+                return NotFound("Genre not found");
+            
+            return Ok(result);
         }
 
 
-        [HttpDelete]
-        public IActionResult Delete(int genreId)
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
         {
-            try{
-                _cmdService.DeleteGenre(genreId);
+            var success = _cmdService.DeleteGenre(id);
+            if(success)
                 return Ok();
-            }
-            catch(ItemNotFoundException ex)
-            {
-                return NotFound(new {message = ex.Message});
-            }
+
+            return NotFound("Genre not found");
         }
 
     }

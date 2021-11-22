@@ -42,37 +42,28 @@ namespace DisneyApi.Characters
             {
                 return BadRequest();
             }
-            var newCharacterId = await _cmdService.CreateCharacter(model);
-            return Ok(newCharacterId);
+            return Ok(await _cmdService.CreateCharacter(model));
         }
         
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            try
-            {
-                _cmdService.DeleteCharacter(id);
+            var success = _cmdService.DeleteCharacter(id);
+            if(success)
                 return Ok();
-            }
-            catch(ItemNotFoundException ex)
-            {
-                return NotFound(new {message = ex.Message});
-            }
+            
+            return NotFound("Item not found");
         }
 
 
         [HttpGet("{id}")]
         public IActionResult Details(int id)
         {
-            try
-            {
-                return Ok(_queryService.GetCharacterById(id));
-            }
-            // catch(Exception ex)
-            catch(ItemNotFoundException ex)
-            {
-                return NotFound(new {message = ex.Message});
-            }
+            var result = _queryService.GetCharacterById(id);
+            if(result == null)
+                return NotFound("Item not found");
+            
+            return Ok(result);
         }
 
         [HttpPut]
@@ -82,15 +73,11 @@ namespace DisneyApi.Characters
             {
                 return BadRequest();
             }
-            try
-            {   
-                await _cmdService.UpdateCharacterAsync(model);
+            var success = await _cmdService.UpdateCharacterAsync(model);
+            if(success)
                 return Ok();
-            }
-            catch(ItemNotFoundException ex)
-            {
-                return NotFound(new {message = ex.Message});
-            }
+
+            return NotFound("Item not found");
         }
     }
 }

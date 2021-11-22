@@ -13,9 +13,8 @@ namespace DisneyApi.AppCode.Movies
     public interface IMovieCommandService
     {
         Task<int> CreateMovie(MovieDTO model);
-        Task UpdateMovieAsync(MovieDTO model);
-        // void UpdateMovieGenre(int movieId, int genreId);
-        void DeleteMovie(int movieId);
+        Task<bool> UpdateMovieAsync(MovieDTO model);
+        bool DeleteMovie(int movieId);
     }
     public class MovieCommandService : IMovieCommandService
     {
@@ -38,22 +37,23 @@ namespace DisneyApi.AppCode.Movies
             return movie.MovieId;
         }
 
-        public void DeleteMovie(int movieId)
+        public bool DeleteMovie(int movieId)
         {
             Movie movie = _context.ActualMovies().Where(s => s.MovieId == movieId)
                 .Include(e => e.Cast).FirstOrDefault();
-            
-            Validate.ValidateNotNull(movie, string.Format("Movie with ID {0} not found", movieId));
+            if(movie == null)            
+                return false;
 
             _context.Remove(movie);
             _context.SaveChanges();
+            return true;
         }
 
-        public async Task UpdateMovieAsync(MovieDTO model)
+        public async Task<bool> UpdateMovieAsync(MovieDTO model)
         {
             Movie movie = _context.ActualMovies().Where(s => s.MovieId == model.Id).FirstOrDefault();
-            
-            Validate.ValidateNotNull(movie, string.Format("Movie with ID {0} not found", model.Id));
+            if(movie == null)
+                return false;
 
             MapModelToMovie(movie, model);
             LinkToCharacters(model.CharacterIds, movie.MovieId);
@@ -63,6 +63,7 @@ namespace DisneyApi.AppCode.Movies
                  .ToList();
             _context.ActualPlayings().RemoveRange(exceptedLinks);
             await _context.SaveChangesAsync();
+            return true;
         }
         
         private void LinkToCharacters(List<int> characterIds, int movieId)

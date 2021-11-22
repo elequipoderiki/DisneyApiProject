@@ -15,9 +15,8 @@ namespace DisneyApi.AppCode.Users
 {
     public interface IUserCommandService
     {
-        // bool UserNameExists(string userName);
+        bool UserNameExists(string userName);
         Task<int> RegisterUserAsync(RegisterData model);
-        // void ActivateUser(ActivateUserCommand activateUserCommand);
     }
 
 
@@ -36,10 +35,6 @@ namespace DisneyApi.AppCode.Users
 
         public async Task<int> RegisterUserAsync(RegisterData model)
         {
-            var userNameAlreadyExists = UserNameExists(model.email);
-            
-            Validate.ValidateIsFalse(userNameAlreadyExists, "Ya existe un usuario con ese email");
-
             string encryptPass = EncriptService.EncryptPass(model.password);
             User user = new User()
             {
@@ -52,7 +47,7 @@ namespace DisneyApi.AppCode.Users
             return user.UserId;
         }
 
-        private bool UserNameExists(string userName)
+        public bool UserNameExists(string userName)
         {
             return _context.RegisteredUsers().Where(u => u.email == userName).Count() > 0;
         }

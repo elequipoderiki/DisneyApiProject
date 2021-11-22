@@ -89,18 +89,16 @@ namespace DisneyApi.AppCode.Characters
         {
             var character = _context.ActualCharacters()
                 .Where(c => c.CharacterId == id).FirstOrDefault();
-            
-            Validate.ValidateNotNull(character, string.Format("Character with id {0} not found", id));
+
+            if(character == null)           
+                return null;
 
             return GetFullFeatures(character);
         }
 
         private CharacterFullFeatures GetFullFeatures(Character character)
         {
- 
-            Validate.ValidateNotNull(character, string.Format("Character with id {0} not found", character.CharacterId));
-
-            CharacterFullFeatures result = new CharacterFullFeatures
+             CharacterFullFeatures result = new CharacterFullFeatures
             {
                 Id = character.CharacterId,
                 Name = character.Name,

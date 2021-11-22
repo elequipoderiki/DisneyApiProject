@@ -13,8 +13,8 @@ namespace DisneyApi.AppCode.Characters
     public interface ICharacterCommandService
     {
         Task<int> CreateCharacter(CharacterDTO character);
-        Task UpdateCharacterAsync(CharacterDTO character);
-        void DeleteCharacter(int characterId);
+        Task<bool> UpdateCharacterAsync(CharacterDTO character);
+        bool DeleteCharacter(int characterId);
     }
 
     public class CharacterCommandService : ICharacterCommandService
@@ -38,12 +38,12 @@ namespace DisneyApi.AppCode.Characters
             return character.CharacterId;
         }
 
-        public async Task UpdateCharacterAsync(CharacterDTO model)
+        public async Task<bool> UpdateCharacterAsync(CharacterDTO model)
         {
             Character character = _context.ActualCharacters().Where(c => c.CharacterId == model.Id)
                 .FirstOrDefault();
-            
-            Validate.ValidateNotNull(character, string.Format("Character with ID {0} not found", model.Id));
+            if(character == null)   
+                return false;
 
             MapModelToCharacter(character, model);
             List<int> newLinks = model.MovieIds;
@@ -53,17 +53,19 @@ namespace DisneyApi.AppCode.Characters
                 .ToList();
             _context.ActualPlayings().RemoveRange(exceptedLinks);
             await _context.SaveChangesAsync();
+            return true;
         }
 
-        public void DeleteCharacter(int characterID)
+        public bool DeleteCharacter(int characterID)
         {
             Character character = _context.ActualCharacters().Where(c => c.CharacterId == characterID)
                 .Include(e => e.Playings).FirstOrDefault();
+            if(character == null)
+                return false;
 
-            Validate.ValidateNotNull(character, string.Format("Character with ID {0} not found", characterID));
-                
             _context.Remove(character);
             _context.SaveChanges();
+            return true;
         }
 
         private void LinkToMovies(List<int> movieIds, int characterId)

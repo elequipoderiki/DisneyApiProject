@@ -13,8 +13,9 @@ namespace DisneyApi.AppCode.Genres
 {
     public interface IGenreCommandService
     {
+        bool IsExistentName(GenreDTO model);
         Task<int> CreateGenre(GenreDTO model);
-        void DeleteGenre(int genreId);
+        bool DeleteGenre(int genreId);
     }
 
     public class GenreCommandService : IGenreCommandService
@@ -27,9 +28,6 @@ namespace DisneyApi.AppCode.Genres
 
         public async Task<int> CreateGenre(GenreDTO model)
         {             
-            bool nameAlreadyExists = _context.ActualGenres().Where(g => g.Name == model.Name).Count() > 0; 
-            Validate.ValidateIsFalse(nameAlreadyExists, string.Format("Genre with name {0} already exists", model.Name));
-
             Genre genre = new Genre()
             {
                 Name = model.Name,
@@ -40,15 +38,22 @@ namespace DisneyApi.AppCode.Genres
             return genre.GenreId;
         }
 
-        public void DeleteGenre(int genreId)
+        public bool IsExistentName(GenreDTO model){
+            return _context.ActualGenres().Where(g => g.Name == model.Name).Count() > 0; 
+        }
+
+
+        public bool DeleteGenre(int genreId)
         {
             Genre genre = _context.ActualGenres().Where(g => g.GenreId == genreId)
                 .Include(e => e.Movies).FirstOrDefault();
-      
-            Validate.ValidateNotNull(genre, string.Format("Genre with ID {0} not found", genreId));
+            if(genre == null)     
+                return false;
+            // Validate.ValidateNotNull(genre, string.Format("Genre with ID {0} not found", genreId));
                   
             _context.Remove(genre);
             _context.SaveChanges();
+            return true;
         }
 
     }

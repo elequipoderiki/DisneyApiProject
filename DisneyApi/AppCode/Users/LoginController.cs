@@ -41,15 +41,14 @@ namespace DisneyApi.AppCode.Users
         [Route("register")]
         public async Task<ActionResult> RegisterAsync( RegisterData model)
         {
-            try
+            bool nameAlreadyExists =  _cmdService.UserNameExists(model.email);
+            if(nameAlreadyExists)
             {
-                var newUserId = await _cmdService.RegisterUserAsync(model);
-                return Ok(newUserId);
+                return BadRequest("User name already exists");
             }
-            catch (ItemAlreadyExistsException ex)
-            {
-                return BadRequest(new { message = ex.Message, errorCode = ex.StatusCode});
-            }
+            
+            var newUserId = await _cmdService.RegisterUserAsync(model);
+            return Ok(newUserId);
         }
 
     }

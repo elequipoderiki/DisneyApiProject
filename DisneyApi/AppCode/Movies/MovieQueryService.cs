@@ -28,8 +28,8 @@ namespace DisneyApi.AppCode.Movies
         {
             var movie = _context.ActualMovies()
                 .Where(m => m.MovieId == id).FirstOrDefault();
-
-            Validate.ValidateNotNull(movie, string.Format("Movie with id {0} not found", id));
+            if(movie == null )
+                return null;
 
             return GetFullFeatures(movie);
         }
@@ -112,8 +112,6 @@ namespace DisneyApi.AppCode.Movies
 
         private MovieFullFeatures GetFullFeatures(Movie movie)
         {
-            Validate.ValidateNotNull(movie, string.Format("Movie with id {0} not found", movie.MovieId));
-
             MovieFullFeatures result = new MovieFullFeatures
             {
                 Id = movie.MovieId,

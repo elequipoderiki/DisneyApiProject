@@ -28,8 +28,7 @@ namespace DisneyApi.AppCode.Movies
         {            
             if(ModelState.IsValid)
             {
-                var newMovieId = await _cmdService.CreateMovie(model);
-                return Ok(newMovieId);
+                return Ok(await _cmdService.CreateMovie(model));
             }
             return BadRequest();
         }
@@ -43,15 +42,11 @@ namespace DisneyApi.AppCode.Movies
         [HttpGet("{id}")]
         public IActionResult Details(int id)
         {
-            try
-            {
-                return Ok(_queryService.GetMovieById(id));
-            }
-            catch(ItemNotFoundException ex)
-            {
-                return NotFound(new {message = ex.Message});
-            }
+            var result = _queryService.GetMovieById(id);
+            if(result == null)
+                return NotFound("Item not found");
 
+            return Ok(result);
         }
 
         [HttpPut]
@@ -61,29 +56,21 @@ namespace DisneyApi.AppCode.Movies
             {
                 return BadRequest();
             }
-            try
-            {   
-                await _cmdService.UpdateMovieAsync(model);
+            var success = await _cmdService.UpdateMovieAsync(model);
+            if(success)
                 return Ok();
-            }
-            catch(ItemNotFoundException ex)
-            {
-                return NotFound(new {message = ex.Message});
-            }
+                
+            return NotFound("Item not found");
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            try
-            {
-                _cmdService.DeleteMovie(id);
+            var success = _cmdService.DeleteMovie(id);
+            if(success)
                 return Ok();
-            }
-            catch(ItemNotFoundException ex)
-            {
-                return NotFound(new {message = ex.Message});
-            }
+
+            return NotFound("Item not found");
         }
 
     }
