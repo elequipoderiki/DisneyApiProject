@@ -40,6 +40,8 @@ namespace DisneyApi.Characters
         {
             if(!ModelState.IsValid)
             {
+                //returning badrequest avoids sending extra information to malicious user
+                //such as username already exists info
                 return BadRequest();
             }
             return Ok(await _cmdService.CreateCharacter(model));
