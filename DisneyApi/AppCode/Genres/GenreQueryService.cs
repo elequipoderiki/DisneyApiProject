@@ -27,7 +27,6 @@ namespace DisneyApi.AppCode.Genres
 
             if(genre == null)           
                 return null;
-            // Validate.ValidatseNotNull(genre, string.Format("Character with id {0} not found", id));
 
             return new GenrePrincipalFeatures()
             {

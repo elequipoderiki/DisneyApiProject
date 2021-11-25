@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
-using DisneyApi.AppCode.Common;
 using DisneyApi.AppCode.Db;
 using DisneyApi.AppCode.Domain;
 using static DisneyApi.AppCode.Common.Utils;
@@ -36,78 +34,61 @@ namespace DisneyApi.AppCode.Movies
 
         public IEnumerable<MoviePrincipalFeatures> GetMovies(string name, int genre, int order)
         {
+            if(order < 0 && name == null && genre < 0)
+                return GetAllMovies();
+
+            IQueryable<Movie> query = _context.ActualMovies();
             if(genre >= 0)
             {
-                return GetMoviesByGenre(genre);
+                query = GetMoviesByGenre(query, genre);
             } 
             if(name != null)
             {
-                return GetMoviesByTitle(name);
+                query = GetMoviesByTitle(query, name);
             } 
             if(order > 0)
             {
-                return GetMoviesByOrder(order);
+                query = GetMoviesByOrder(query, order);
             }
-            return GetAllMovies();
-        }
-
-        private IEnumerable<MoviePrincipalFeatures> GetAllMovies()
-        {
-            Func<Movie, bool> predicate = m => true;
-            Func<Movie, MoviePrincipalFeatures> selector = m => 
-                    new MoviePrincipalFeatures{
-                        Title = m.Title,
-                        Image = m.Image,
-                        CreateDate = m.CreateDate
-                    };
-            return MovieFilter<MoviePrincipalFeatures>(predicate, selector);
-        }
-
-        private IEnumerable<MoviePrincipalFeatures> GetMoviesByOrder(int order)
-        {
-            Expression<Func<Movie, DateTime>> keySelector = m => m.CreateDate;
-            IQueryable<Movie> res = ApplyOrderByKey(order, keySelector);
-            return res.ToList()
+            return query.ToList()
                 .Select(movie => GetFullFeatures(movie))
                 .ToList();
         }
 
-        private IQueryable<Movie> ApplyOrderByKey(int order, Expression<Func<Movie, DateTime>> keySelector)
+        private IEnumerable<MoviePrincipalFeatures> GetAllMovies()
+        {
+            return _context.ActualMovies()
+                .Select(m => new MoviePrincipalFeatures
+                    {
+                        Title = m.Title,
+                        Image = m.Image,
+                        CreateDate = m.CreateDate
+                    })
+                .ToList();
+        }
+
+        private IQueryable<Movie> GetMoviesByOrder(IQueryable<Movie> query, int order)
         {
             var isAscOrd = order == (int) OrderDirection.ASC ? true : false;
             var res = _context.ActualMovies();
             if(isAscOrd)
             {
-                return res.OrderBy(keySelector);
+                return query.OrderBy(m => m.CreateDate);
             }
             else
             {
-                return res.OrderByDescending(keySelector);
-            }
+                return query.OrderByDescending(m => m.CreateDate);
+            }            
         }
 
-        private IEnumerable<MoviePrincipalFeatures> GetMoviesByTitle(string title)
+        private IQueryable<Movie> GetMoviesByTitle(IQueryable<Movie> query, string title)
         {
-            Func<Movie, bool> predicate = m => m.Title == title;
-            Func<Movie, MovieFullFeatures> selector = movie => 
-                GetFullFeatures(movie);
-            return MovieFilter<MovieFullFeatures>(predicate, selector);
+            return query.Where(m => m.Title == title);
         }
 
-        private IEnumerable<MoviePrincipalFeatures> GetMoviesByGenre(int genreId)
+        private IQueryable<Movie> GetMoviesByGenre(IQueryable<Movie> query, int genreId)
         {
-            Func<Movie, bool> predicate = m => m.GenreId == genreId;
-            Func<Movie, MovieFullFeatures> selector = movie => 
-                GetFullFeatures(movie);
-            return MovieFilter<MovieFullFeatures>(predicate, selector);
-        }
-
-        private IEnumerable<T> MovieFilter<T>(Func<Movie, bool> predicate, Func<Movie, T> selector)
-        {
-            return (IEnumerable<T>) _context.ActualMovies().ToList()
-                .Where(predicate)
-                .Select(selector)
-                .ToList();
+            return query.Where(m => m.GenreId == genreId);
         }
 
         private MovieFullFeatures GetFullFeatures(Movie movie)
@@ -117,7 +98,7 @@ namespace DisneyApi.AppCode.Movies
                 Id = movie.MovieId,
                 Rating = movie.Rating,
                 GenreId = movie.GenreId == 0 ? null : (Nullable<int>) movie.GenreId,
-                CreateDate = movie.CreateDate,
+                CreateDate = movie.CreateDate.Date,
                 Title = movie.Title,
                 Image = movie.Image
             };

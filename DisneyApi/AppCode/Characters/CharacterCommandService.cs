@@ -12,7 +12,7 @@ namespace DisneyApi.AppCode.Characters
 {
     public interface ICharacterCommandService
     {
-        Task<int> CreateCharacter(CharacterDTO character);
+        Task<int> CreateCharacterAsync(CharacterDTO character);
         Task<bool> UpdateCharacterAsync(CharacterDTO character);
         bool DeleteCharacter(int characterId);
     }
@@ -28,7 +28,7 @@ namespace DisneyApi.AppCode.Characters
             _playingService = playingService;
         }
 
-        public async Task<int> CreateCharacter(CharacterDTO model)
+        public async Task<int> CreateCharacterAsync(CharacterDTO model)
         {
             Character character = new Character();
             MapModelToCharacter(character, model);

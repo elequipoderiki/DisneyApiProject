@@ -44,7 +44,7 @@ namespace DisneyApi.Characters
                 //such as username already exists info
                 return BadRequest();
             }
-            return Ok(await _cmdService.CreateCharacter(model));
+            return Ok(await _cmdService.CreateCharacterAsync(model));
         }
         
         [HttpDelete("{id}")]

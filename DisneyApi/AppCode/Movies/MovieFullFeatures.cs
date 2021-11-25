@@ -14,6 +14,6 @@ namespace DisneyApi.AppCode.Movies
         public int? GenreId { get; set; } 
 
         public List<int> CharacterIds {get; set;} = new List<int>();
- 
+
     }
 }

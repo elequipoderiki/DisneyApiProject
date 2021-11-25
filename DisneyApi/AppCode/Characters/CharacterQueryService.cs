@@ -22,69 +22,6 @@ namespace DisneyApi.AppCode.Characters
             _context = context;
         }
 
-        public IEnumerable<CharacterPrincipalFeatures> GetCharacters(string name, int age, int movieId)
-        {
-            if(movieId >= 0)
-            {
-                return GetCharactersByMovie(movieId);
-            } 
-            if(name != null)
-            {
-                return GetCharactersByName(name);
-            } 
-            if(age >= 0)
-            {
-                return GetCharactersByAge(age);
-            }
-            return GetAllCharacters();
-        }
-
-        private IEnumerable<CharacterPrincipalFeatures> GetAllCharacters()
-        {
-            Func<Character, bool> predicate = c => true;
-            Func<Character, CharacterPrincipalFeatures> selector = c => 
-                    new CharacterPrincipalFeatures{
-                        Name = c.Name,
-                        Image = c.Image
-                    };
-            return CharacterFilter<CharacterPrincipalFeatures>(predicate, selector);
-        }
-
-        private IEnumerable<CharacterPrincipalFeatures> GetCharactersByAge(int age)
-        {
-            Func<Character, bool> predicate = c => c.Age == age;
-            Func<Character, CharacterFullFeatures> selector = character => 
-                GetFullFeatures(character);
-            return CharacterFilter<CharacterFullFeatures>(predicate, selector);
-        }
-
-        private IEnumerable<CharacterPrincipalFeatures> GetCharactersByName(string name)
-        {
-            Func<Character, bool> predicate = c => c.Name == name;
-            Func<Character, CharacterFullFeatures> selector = character => 
-                GetFullFeatures(character);
-            return CharacterFilter<CharacterFullFeatures>(predicate, selector);
-        }
-
-        private IEnumerable<CharacterPrincipalFeatures> GetCharactersByMovie(int movieId)
-        {
-            return _context.ActualPlayings()
-                .Where(p => p.MovieId == movieId).ToList()
-                .Join(_context.ActualCharacters(),
-                    p => p.CharacterId,
-                    c => c.CharacterId,
-                    (p, c) => GetFullFeatures(c))
-                .ToList();
-        }
-
-        private IEnumerable<T> CharacterFilter<T>(Func<Character, bool> predicate, Func<Character, T> selector)
-        {
-            return (IEnumerable<T>) _context.ActualCharacters().ToList()
-                .Where(predicate)
-                .Select(selector)
-                .ToList();
-        }
-
         public CharacterPrincipalFeatures GetCharacterById(int id)
         {
             var character = _context.ActualCharacters()
@@ -94,6 +31,60 @@ namespace DisneyApi.AppCode.Characters
                 return null;
 
             return GetFullFeatures(character);
+        }
+
+        public IEnumerable<CharacterPrincipalFeatures> GetCharacters(string name, int age, int movieId)
+        {
+            if(movieId < 0 && name == null && age < 0)
+                return GetAllCharacters();
+
+            IQueryable<Character> query = _context.ActualCharacters();
+            if(name != null)
+            {
+                query = GetCharactersByName(query, name);
+            } 
+            if(age >= 0)
+            {
+                query = GetCharactersByAge(query, age);
+            }
+            if(movieId >= 0)
+            {
+                query = GetCharactersByMovie(query, movieId);
+            } 
+            return query.ToList()
+                .Select(character => GetFullFeatures(character))
+                .ToList();
+        }
+
+        private IEnumerable<CharacterPrincipalFeatures> GetAllCharacters()
+        {
+            return  _context.ActualCharacters()
+                .Select(c => new CharacterPrincipalFeatures
+                    {
+                        Name = c.Name,
+                        Image = c.Image
+                    })
+                .ToList();
+        }
+
+        private IQueryable<Character> GetCharactersByAge(IQueryable<Character> query, int age)
+        {
+            return query.Where(c => c.Age == age);
+        }
+
+        private IQueryable<Character> GetCharactersByName(IQueryable<Character> query, string name)
+        {
+            return query.Where(c => c.Name == name);
+        }
+
+        private IQueryable<Character> GetCharactersByMovie(IQueryable<Character> query, int movieId)
+        {
+            return _context.ActualPlayings()
+                .Where(p => p.MovieId == movieId)
+                .Join(query,
+                    p => p.CharacterId,
+                    c => c.CharacterId,
+                    (p, c) => c);
         }
 
         private CharacterFullFeatures GetFullFeatures(Character character)

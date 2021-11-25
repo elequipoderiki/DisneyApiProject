@@ -28,7 +28,7 @@ namespace DisneyApi.AppCode.Movies
         {            
             if(ModelState.IsValid)
             {
-                return Ok(await _cmdService.CreateMovie(model));
+                return Ok(await _cmdService.CreateMovieAsync(model));
             }
             return BadRequest();
         }

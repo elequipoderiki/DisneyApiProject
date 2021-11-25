@@ -12,7 +12,7 @@ namespace DisneyApi.AppCode.Movies
 {
     public interface IMovieCommandService
     {
-        Task<int> CreateMovie(MovieDTO model);
+        Task<int> CreateMovieAsync(MovieDTO model);
         Task<bool> UpdateMovieAsync(MovieDTO model);
         bool DeleteMovie(int movieId);
     }
@@ -27,7 +27,7 @@ namespace DisneyApi.AppCode.Movies
             _playingService = playingService;
         }
 
-        public async Task<int> CreateMovie(MovieDTO model)
+        public async Task<int> CreateMovieAsync(MovieDTO model)
         {
             Movie movie = new Movie();
             MapModelToMovie(movie, model);

@@ -36,7 +36,7 @@ namespace DisneyApi.Tests
             };
         }
 
-        public async Task<int> CreateCharacter(CharacterDTO character)
+        public async Task<int> CreateCharacterAsync(CharacterDTO character)
         {
             CharacterFullFeatures newCharacter = new CharacterFullFeatures()
             {
