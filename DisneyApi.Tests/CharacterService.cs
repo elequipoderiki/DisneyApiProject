@@ -7,33 +7,40 @@ using DisneyApi.AppCode.Characters;
 
 namespace DisneyApi.Tests
 {
-    public class CharacterService : ICharacterQueryService,  ICharacterCommandService
+    public class FakeCharacterService : ICharacterQueryService,  ICharacterCommandService
     {
         private List<CharacterFullFeatures> _characters;
-        private static int NewCharacterId = 4;
-        public CharacterService()
+        private static int NewCharacterId = 1;
+
+        public FakeCharacterService()
         {
-            _characters = new  List<CharacterFullFeatures>() 
-            {
+            _characters = new  List<CharacterFullFeatures>();
+        }
+
+        public void SeedTwoCharactersInOrderWithNames(string name1, string name2)
+        {
+            _characters.Add(
                 new CharacterFullFeatures()
                 {
                     Id = 1,
-                    Name = "Mickey",
-                    Age = 30,
-                    Weight = 100,
-                    History = "",
-                    Image = ""
-                },
-                new CharacterFullFeatures ()
-                {
-                    Id = 2,
-                    Name = "Donald",
+                    Name = name1,
                     Age = 30,
                     Weight = 100,
                     History = "",
                     Image = ""
                 }
-            };
+            ); 
+            _characters.Add(
+                new CharacterFullFeatures ()
+                {
+                    Id = 2,
+                    Name = name2,
+                    Age = 30,
+                    Weight = 100,
+                    History = "",
+                    Image = ""
+                }
+            );
         }
 
         public async Task<int> CreateCharacterAsync(CharacterDTO character)
@@ -80,11 +87,17 @@ namespace DisneyApi.Tests
 
         public IEnumerable<CharacterPrincipalFeatures> GetCharacters(string name, int age, int movieId)
         {
+            var result = new List<CharacterPrincipalFeatures>();
             if(name != null || age > 0 || movieId > 0)
             {
-                return new List<CharacterPrincipalFeatures>() {_characters[0]};
+                result.Add(_characters[0]);
+                return result;
             }            
-            return _characters;
+
+            return  _characters.Select(c => new CharacterPrincipalFeatures(){
+                Name = c.Name,
+                Image = c.Image
+            });
         }
 
     }
