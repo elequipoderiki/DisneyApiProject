@@ -1,9 +1,6 @@
-using DisneyApi.AppCode.Common;
 using DisneyApi.AppCode.Domain;
-using DisneyApi.AppCode.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Threading.Tasks;
 
 namespace DisneyApi.AppCode.Users

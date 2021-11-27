@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using DisneyApi.AppCode.Characters;
-using DisneyApi.AppCode.Common;
-using DisneyApi.AppCode.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

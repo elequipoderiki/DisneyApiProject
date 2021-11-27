@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DisneyApi.AppCode.Db;
@@ -7,7 +5,6 @@ using DisneyApi.AppCode.Domain;
 using DisneyApi.AppCode.Playings;
 using DisneyApi.AppCode.Movies;
 using Microsoft.EntityFrameworkCore;
-using DisneyApi.AppCode.Common;
 
 namespace DisneyApi.AppCode.Genres
 {
@@ -49,7 +46,6 @@ namespace DisneyApi.AppCode.Genres
                 .Include(e => e.Movies).FirstOrDefault();
             if(genre == null)     
                 return false;
-            // Validate.ValidateNotNull(genre, string.Format("Genre with ID {0} not found", genreId));
                   
             _context.Remove(genre);
             _context.SaveChanges();

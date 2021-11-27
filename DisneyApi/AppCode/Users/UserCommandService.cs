@@ -1,15 +1,10 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using DisneyApi.AppCode.Common;
 using DisneyApi.AppCode.Db;
 using DisneyApi.AppCode.Domain;
 using DisneyApi.AppCode.Services;
 using Microsoft.Extensions.Configuration;
-using SendGrid;
-using SendGrid.Helpers.Mail;
 
 namespace DisneyApi.AppCode.Users
 {
