@@ -24,13 +24,11 @@ namespace DisneyApi.AppCode.Users
     {
         private readonly IDbContext _context;
         private readonly IEMailService _emailService;
-        private IConfiguration _config;
-
+    
         public UserCommandService(IDbContext context, IEMailService emailService, IConfiguration config)
         {
             _context = context;
             _emailService = emailService;
-            _config = config;
         }
 
         public async Task<int> RegisterUserAsync(RegisterData model)
