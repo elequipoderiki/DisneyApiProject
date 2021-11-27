@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using DisneyApi.AppCode.Database;
 using DisneyApi.AppCode.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -74,6 +75,8 @@ namespace DisneyApi.AppCode.Db
               .WithOne(s => s.Genre)
               .HasForeignKey(s => s.GenreId)
               .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Seed();
         }
 
         public DbSet<Genre> ActualGenres()
